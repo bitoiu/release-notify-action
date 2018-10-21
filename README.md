@@ -7,6 +7,7 @@ This Action makes use of [SendGrid's](https://sendgrid.com/) API to send the e-m
 ## Pre-requisites
 
 To run this action you'll need:
+ - To be part of the [Actions beta](https://github.com/features/actions). Note that during the beta, Actions will only run on private repositories.
  - A [**SendGrid API Key**](https://sendgrid.com/docs/ui/account-and-settings/api-keys/). _SendGrid is [free to up 100 e-mails a day](https://sendgrid.com/pricing/) so feel free to register and get your API KEY._
  - **A text file hosted anywhere** with the list of e-mail recipients. _I personally use [GitHub Gists](https://gist.github.com) and get the link of the raw file._
 
