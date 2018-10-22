@@ -5,7 +5,7 @@ LABEL "com.github.actions.description"="Notifies developers via e-mail of releas
 LABEL "com.github.actions.icon"="send"
 LABEL "com.github.actions.color"="yellow"
 
-LABEL "repository"="http://github.com/bitoiu/vennlib"
+LABEL "repository"="http://github.com/bitoiu/release-notify-action"
 LABEL "homepage"="http://github.com/bitoiu"
 LABEL "maintainer"="vmrmonteiro@gmail.com"
 
