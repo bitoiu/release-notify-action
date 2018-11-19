@@ -1,7 +1,6 @@
 FROM node:10.11.0-alpine
 
 COPY ./src /notify-action
-COPY ./entrypoint.sh /notify-action/entrypoint.sh
 
 ENTRYPOINT ["/notify-action/entrypoint.sh"]
 
