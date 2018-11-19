@@ -1,7 +1,6 @@
 src/node_modules
-src/sample-payload.json
 *.md
 .gitignore
 *.iml
 .idea
-secrets
+env
