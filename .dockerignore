@@ -4,3 +4,4 @@ src/sample-payload.json
 .gitignore
 *.iml
 .idea
+secrets
