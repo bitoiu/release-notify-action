@@ -77,11 +77,13 @@ The main script that does the heavy lifting is a NodeJS file. As such you can si
 SENDGRID_API_TOKEN=XXX RECIPIENTS=ABSOLUTE_PATH_TO_TXT_FILE_WITH_RECIPIENTS GITHUB_EVENT_PATH=ABSOLUTE_PATH_TO_SAMPLE_PAYLOAD_FILE_PROVIDED node notify.js
 ```
 
-If you prefer to test the container directly (which is a tiny bit slower) you can just run something like:
+If you prefer to test the container directly (which is a tiny bit slower but more reliable) you can just run something like:
 
 ```
-docker run -e SENDGRID_API_TOKEN=XXX -e RECIPIENTS=HOSTED_FILE_WITH_EMAILS -e GITHUB_EVENT_PATH="/notify-action/sample-payload.json" -it $(docker build -q .)
+docker build -t release . && docker run --env-file=./env release
 ```
+
+Be sure to rename `env.template` to `env` and fill it with your environment variables.
 
 ## Pull Requests and Issues are Welcome
 
