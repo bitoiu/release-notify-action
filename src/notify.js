@@ -35,10 +35,12 @@ let prepareMessage = function(recipients) {
         console.error(error);
         process.exit(1);
       }
-      return body;
-    },
-    owner = JSON.parse(request.get(options, callback)),
-    ownerName = owner.name,
+      var owner = JSON.parse(body);
+    };
+
+    request.get(options, callback);
+
+    let ownerName = owner.name,
 
     // This is not efficient but I find it quite readable
     emailSubject = SUBJECT_TEMPLATE
