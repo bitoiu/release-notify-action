@@ -1,6 +1,6 @@
 // External dependencies
 const sendgridMail = require('@sendgrid/mail'),
-  showdown  = require('showdown'),
+  showdown = require('showdown'),
   fs = require('fs'),
   request = require("request")
 
@@ -9,7 +9,7 @@ const SUBJECT_TEMPLATE = "[ANN] $REPO$ $VERSION$ [$NAME$] released!",
   FOOTER_TEMPLATE = "\n\nRegards,\n\nThe $OWNER_NAME$ team.",
   HEADER_TEMPLATE = "[$REPO$]($REPO_URL$)$REPO_DESCRIPTION$ reached it's [$VERSION$]($RELEASEURL$) version."
 
-let setCredentials = function(){
+let setCredentials = function() {
   sendgridMail.setApiKey(process.env.SENDGRID_API_TOKEN)
 }
 
@@ -23,17 +23,31 @@ let prepareMessage = function(recipients) {
     releaseVersion = eventPayload.release.tag_name,
     releaseName = eventPayload.release.name,
     releaseURL = eventPayload.release.html_url,
-    //I will get later the owner name using the GitHub API
-    ownerName = "Buenos Aires Smalltalk",
+    options = {
+      url: eventPayload.repository.owner.url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + process.env.GITHUB_TOKEN
+      }
+    },
+    callback = (error, response, body) => {
+      if (error) {
+        console.error(error);
+        process.exit(1);
+      }
+      return body;
+    },
+    owner = JSON.parse(request.get(options, callback)),
+    ownerName = owner.name,
 
     // This is not efficient but I find it quite readable
     emailSubject = SUBJECT_TEMPLATE
-      .replace("$REPO$", repoName)
-      .replace("$VERSION$", releaseVersion)
-      .replace("$NAME$", releaseName),
+    .replace("$REPO$", repoName)
+    .replace("$VERSION$", releaseVersion)
+    .replace("$NAME$", releaseName),
 
     footer = FOOTER_TEMPLATE
-      .replace("$OWNER_NAME$", ownerName),
+    .replace("$OWNER_NAME$", ownerName),
 
     header = HEADER_TEMPLATE
     .replace("$REPO$", repoName)
@@ -58,7 +72,7 @@ let prepareMessage = function(recipients) {
   return message
 }
 
-sendEmails = function (message) {
+sendEmails = function(message) {
 
   sendgridMail
     .send(message)
@@ -71,10 +85,17 @@ sendEmails = function (message) {
       console.error(error.toString())
 
       //Extract error message
-      const {message, code, response} = error
+      const {
+        message,
+        code,
+        response
+      } = error
 
       //Extract response message
-      const {headers, body} = response
+      const {
+        headers,
+        body
+      } = response
     });
 }
 
