@@ -7,7 +7,7 @@ const sendgridMail = require('@sendgrid/mail'),
 // E-mail string templates
 const SUBJECT_TEMPLATE = "[ANN] $REPO$ $VERSION$ [$NAME$] released!",
   FOOTER_TEMPLATE = "\n\nRegards,\n\nThe $OWNER_NAME$ team.",
-  HEADER_TEMPLATE = "[$REPO$]($REPO_URL$) $REPO_DESCRIPTION$ reached it's [$VERSION$]($RELEASEURL$) version.\n\n"
+  HEADER_TEMPLATE = "[$REPO$]($REPO_URL$)$REPO_DESCRIPTION$ reached it's [$VERSION$]($RELEASEURL$) version."
 
 let setCredentials = function(){
   sendgridMail.setApiKey(process.env.SENDGRID_API_TOKEN)
@@ -19,7 +19,7 @@ let prepareMessage = function(recipients) {
     converter = new showdown.Converter(),
     repoName = eventPayload.repository.name,
     repoURL = eventPayload.repository.html_url,
-    repoDescription = eventPayload.repository.description == null ? "" : ", " + eventPayload.repository.description.toLowerCase(), 
+    repoDescription = eventPayload.repository.description == null ? "" : ", " + eventPayload.repository.description.toLowerCase(),
     releaseVersion = eventPayload.release.tag_name,
     releaseName = eventPayload.release.name,
     releaseURL = eventPayload.release.html_url,
@@ -42,7 +42,7 @@ let prepareMessage = function(recipients) {
     .replace("$REPO_DESCRIPTION$", repoDescription)
     .replace("$RELEASEURL$", releaseURL),
 
-    releaseBody = converter.makeHtml(header + eventPayload.release.body + footer)
+    releaseBody = converter.makeHtml(header + "\n\n" + eventPayload.release.body + footer)
 
   let message = {
     to: 'noreply@github.com',
