@@ -45,6 +45,7 @@ let prepareMessage = function(recipients) {
     releaseBody = converter.makeHtml(header + eventPayload.release.body + footer)
 
   let message = {
+    to: 'noreply@github.com',
     from: {
       name: ownerName,
       email: 'notifications@github.com'
