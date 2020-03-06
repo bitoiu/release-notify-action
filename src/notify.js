@@ -1,16 +1,16 @@
 // External dependencies
-const sgMail = require('@sendgrid/mail'),
+const sendgridMail = require('@sendgrid/mail'),
   showdown  = require('showdown'),
   fs = require('fs'),
   request = require("request")
 
 // E-mail string templates
-const SUBJECT_TEMPLATE = "New $REPO$ release: $NAME$ ($VERSION$)",
-  FOOTER_TEMPLATE = "\n\n## Where to find the release?\n\n[Visit the release page]($RELEASEURL$)\n\n## Found a bug?\n\n [Open a new issue in our repo]($NEWISSUEURL$)"
-
+const SUBJECT_TEMPLATE = "[ANN] $REPO$ $VERSION$ [$NAME$] released!",
+  FOOTER_TEMPLATE = "\n\nRegards,\n\nThe $OWNER_NAME$ team.",
+  HEADER_TEMPLATE = "[$REPO$]($REPO_URL$). $REPO_DESCRIPTION$ reached it's [$VERSION$]($RELEASEURL$) version."
 
 let setCredentials = function(){
-  sgMail.setApiKey(process.env.SENDGRID_API_TOKEN)
+  sendgridMail.setApiKey(process.env.SENDGRID_API_TOKEN)
 }
 
 let prepareMessage = function(recipients) {
@@ -18,10 +18,13 @@ let prepareMessage = function(recipients) {
   let eventPayload = JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8')),
     converter = new showdown.Converter(),
     repoName = eventPayload.repository.name,
+    repoURL = eventPayload.repository.html_url,
+    repoDescription = eventPayload.repository.description,
     releaseVersion = eventPayload.release.tag_name,
     releaseName = eventPayload.release.name,
     releaseURL = eventPayload.release.html_url,
-    newIssueURL = eventPayload.repository.html_url + "/issues/new",
+    //I will get later the owner name using the GitHub API
+    ownerName = "Buenos Aires Smalltalk",
 
     // This is not efficient but I find it quite readable
     emailSubject = SUBJECT_TEMPLATE
@@ -30,29 +33,34 @@ let prepareMessage = function(recipients) {
       .replace("$NAME$", releaseName),
 
     footer = FOOTER_TEMPLATE
-      .replace("$RELEASEURL$", releaseURL)
-      .replace("$NEWISSUEURL$", newIssueURL),
+      .replace("$OWNER_NAME$", ownerName),
 
-    releaseBody = converter.makeHtml(eventPayload.release.body + footer)
+    header = HEADER_TEMPLATE
+    .replace("$REPO$", repoName)
+    .replace("$VERSION$", releaseVersion)
+    .replace("$REPO_URL$", repoURL)
+    .replace("$REPO_DESCRIPTION$", repoDescription)
+    .replace("$RELEASEURL$", releaseURL),
 
-  let msg = {
-    to: ['subscribers@no-reply.com'],
+    releaseBody = converter.makeHtml(header + eventPayload.release.body + footer)
+
+  let message = {
     from: {
-      name: 'GitHub Releases',
-      email: 'no-reply@no-reply.com'
+      name: ownerName,
+      email: 'notifications@github.com'
     },
     bcc: recipients,
     subject: emailSubject,
     html: releaseBody
   };
 
-  return msg
+  return message
 }
 
-sendEmails = function (msg) {
+sendEmails = function (message) {
 
-  sgMail
-    .send(msg)
+  sendgridMail
+    .send(message)
     .then(() => {
       console.log("Mail sent!")
     })
@@ -61,10 +69,10 @@ sendEmails = function (msg) {
       //Log friendly error
       console.error(error.toString())
 
-      //Extract error msg
+      //Extract error message
       const {message, code, response} = error
 
-      //Extract response msg
+      //Extract response message
       const {headers, body} = response
     });
 }
