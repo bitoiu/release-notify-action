@@ -66,7 +66,7 @@ let prepareMessage = function(recipients) {
   let message = {
     to: 'noreply@github.com',
     from: {
-      name: ownerName,
+      name: owner.name,
       email: 'notifications@github.com'
     },
     bcc: recipients,
