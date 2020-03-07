@@ -26,6 +26,7 @@ let loadOwnerData = function(url, owner) {
       console.error(error);
       process.exit(1);
     }
+    console.log(body);
     owner.name = (JSON.parse(body)).name;
   };
   request.get(options, callback);
@@ -66,7 +67,7 @@ let prepareMessage = function(recipients) {
   let message = {
     to: 'noreply@github.com',
     from: {
-      name: owner.name,
+      name: owner.n ame,
       email: 'notifications@github.com'
     },
     bcc: recipients,
