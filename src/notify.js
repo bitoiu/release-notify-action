@@ -13,6 +13,24 @@ let setCredentials = function() {
   sendgridMail.setApiKey(process.env.SENDGRID_API_TOKEN)
 }
 
+let loadOwnerData = function(url, owner) {
+  let options = {
+    url: url,
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + process.env.GITHUB_TOKEN
+    }
+  },
+  callback = (error, response, body) => {
+    if (error) {
+      console.error(error);
+      process.exit(1);
+    }
+    owner.name = (JSON.parse(body)).name;
+  };
+  request.get(options, callback);
+}
+
 let prepareMessage = function(recipients) {
 
   let eventPayload = JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8')),
@@ -23,24 +41,9 @@ let prepareMessage = function(recipients) {
     releaseVersion = eventPayload.release.tag_name,
     releaseName = eventPayload.release.name,
     releaseURL = eventPayload.release.html_url,
-    options = {
-      url: eventPayload.repository.owner.url,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + process.env.GITHUB_TOKEN
-      }
-    },
-    callback = (error, response, body) => {
-      if (error) {
-        console.error(error);
-        process.exit(1);
-      }
-      var owner = JSON.parse(body);
-    };
+    owner = {};
 
-    request.get(options, callback);
-
-    let ownerName = owner.name,
+    loadOwnerData(eventPayload.repository.owner.url, owner);
 
     // This is not efficient but I find it quite readable
     emailSubject = SUBJECT_TEMPLATE
@@ -49,7 +52,7 @@ let prepareMessage = function(recipients) {
     .replace("$NAME$", releaseName),
 
     footer = FOOTER_TEMPLATE
-    .replace("$OWNER_NAME$", ownerName),
+    .replace("$OWNER_NAME$", owner.name),
 
     header = HEADER_TEMPLATE
     .replace("$REPO$", repoName)
