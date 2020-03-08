@@ -18,7 +18,7 @@ let loadOwnerData = function(url, owner) {
     url: url,
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + process.env.GITHUB_TOKEN ,
+      'Authorization': 'Bearer ' + process.env.GITHUB_ORG_TOKEN ,
       'User-Agent': 'GitHub Action/1.0 Action to get e-mail notifications on project releases'
     }
   },
