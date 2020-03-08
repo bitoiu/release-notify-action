@@ -42,13 +42,13 @@ let prepareMessage = function(recipients) {
     repoDescription = eventPayload.repository.description == null ? "" : ", " + eventPayload.repository.description.toLowerCase(),
     releaseVersion = eventPayload.release.tag_name,
     releaseName = eventPayload.release.name,
-    releaseURL = eventPayload.release.html_url,
-    owner = {};
+    releaseURL = eventPayload.release.html_url;
+  var owner = {};
 
-    loadOwnerData(eventPayload.repository.owner.url, owner);
+  loadOwnerData(eventPayload.repository.owner.url, owner);
 
-    // This is not efficient but I find it quite readable
-    emailSubject = SUBJECT_TEMPLATE
+  // This is not efficient but I find it quite readable
+  let emailSubject = SUBJECT_TEMPLATE
     .replace("$REPO$", repoName)
     .replace("$VERSION$", releaseVersion)
     .replace("$NAME$", releaseName),
