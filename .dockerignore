@@ -1,6 +1,8 @@
-src/node_modules
-*.md
+.eslintrc.json
 .gitignore
-*.iml
 .idea
-env
+.prettierrc
+*.md
+env*
+LICENSE
+node_modules/

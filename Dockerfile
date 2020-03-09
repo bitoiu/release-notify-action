@@ -1,8 +1,5 @@
 FROM node:10.11.0-alpine
-
-COPY ./src /notify-action
-
-ENTRYPOINT ["/notify-action/entrypoint.sh"]
+ENV NODE_ENV=production
 
 LABEL "com.github.actions.name"="Release Notifier Action"
 LABEL "com.github.actions.description"="Notifies developers on release with release notes via e-mail"
@@ -11,3 +8,10 @@ LABEL "com.github.actions.color"="yellow"
 LABEL "repository"="http://github.com/ba-st/actions-email-release-notifications"
 LABEL "homepage"="http://github.com/ba-st"
 LABEL "maintainer"="gcotelli@gmail.com"
+
+WORKDIR /opt/notify
+COPY package.json package-lock.json ./
+COPY src ./src
+RUN npm install --production
+
+ENTRYPOINT ["npm", "start"]

@@ -1,0 +1,12 @@
+{
+  "extends": ["airbnb-base"],
+  "rules": {
+    "arrow-parens": ["error", "as-needed", { "requireForBlockBody": true }],
+    "no-console": ["error", { "allow": ["error", "log"] }],
+    "lines-between-class-members": ["error", "always", { "exceptAfterSingleLine": true }],
+    "no-multi-spaces": ["error", { "ignoreEOLComments": true, "exceptions": { "VariableDeclarator": true } }]
+  },
+  "env": {
+    "node": true
+  }
+}
