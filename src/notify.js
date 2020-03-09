@@ -2,38 +2,18 @@
 const sendgridMail = require('@sendgrid/mail'),
   showdown = require('showdown'),
   fs = require('fs'),
-  request = require("request")
+  axios = require('axios');
 
 // E-mail string templates
 const SUBJECT_TEMPLATE = "[ANN] $REPO$ $VERSION$ [$NAME$] released!",
   FOOTER_TEMPLATE = "\n\nRegards,\n\nThe $OWNER_NAME$ team.",
-  HEADER_TEMPLATE = "[$REPO$]($REPO_URL$)$REPO_DESCRIPTION$ reached it's [$VERSION$]($RELEASEURL$) version."
+  HEADER_TEMPLATE = "[$REPO$]($REPO_URL$)$REPO_DESCRIPTION$ reached it's [$VERSION$]($RELEASEURL$) version.";
 
 let setCredentials = function() {
   sendgridMail.setApiKey(process.env.SENDGRID_API_TOKEN)
-}
+};
 
-let loadOwnerData = function(url, owner) {
-  let options = {
-    url: url,
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + process.env.GITHUB_ORG_TOKEN ,
-      'User-Agent': 'GitHub Action/1.0 Action to get e-mail notifications on project releases'
-    }
-  },
-  callback = (error, response, body) => {
-    if (error) {
-      console.error(error);
-      process.exit(1);
-    }
-    console.log(body);
-    owner.name = (JSON.parse(body)).name;
-  };
-  request.get(options, callback);
-}
-
-let prepareMessage = function(recipients) {
+async function prepareMessage(recipients) {
 
   let eventPayload = JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8')),
     converter = new showdown.Converter(),
@@ -43,9 +23,8 @@ let prepareMessage = function(recipients) {
     releaseVersion = eventPayload.release.tag_name,
     releaseName = eventPayload.release.name,
     releaseURL = eventPayload.release.html_url;
-  var owner = {};
-
-  loadOwnerData(eventPayload.repository.owner.url, owner);
+  const ownerResponse = await axios.get(eventPayload.repository.owner.url);
+  let ownerName = await ownerResponse.data.name;
 
   // This is not efficient but I find it quite readable
   let emailSubject = SUBJECT_TEMPLATE
@@ -54,7 +33,7 @@ let prepareMessage = function(recipients) {
     .replace("$NAME$", releaseName),
 
     footer = FOOTER_TEMPLATE
-    .replace("$OWNER_NAME$", owner.name),
+    .replace("$OWNER_NAME$", ownerName),
 
     header = HEADER_TEMPLATE
     .replace("$REPO$", repoName)
@@ -63,12 +42,12 @@ let prepareMessage = function(recipients) {
     .replace("$REPO_DESCRIPTION$", repoDescription)
     .replace("$RELEASEURL$", releaseURL),
 
-    releaseBody = converter.makeHtml(header + "\n\n" + eventPayload.release.body + footer)
+    releaseBody = converter.makeHtml(header + "\n\n" + eventPayload.release.body + footer);
 
   let message = {
     to: 'noreply@github.com',
     from: {
-      name: owner.name,
+      name: ownerName,
       email: 'notifications@github.com'
     },
     bcc: recipients,
@@ -79,9 +58,9 @@ let prepareMessage = function(recipients) {
   return message
 }
 
-sendEmails = function(message) {
+sendEmails = function(promise) {
 
-  sendgridMail
+  promise.then( (message) => sendgridMail
     .send(message)
     .then(() => {
       console.log("Mail sent!")
@@ -103,22 +82,17 @@ sendEmails = function(message) {
         headers,
         body
       } = response
-    });
+    }))
 }
-
-
 
 let getRecipients = function(recipients_url, callback) {
 
-  request.get(recipients_url, (error, response, body) => {
-    if (error) {
-      console.error(error)
-      process.exit(1);
-    }
-
-    callback(body.split(/\r\n|\n|\r/))
-
-  });
+  axios.get(recipients_url).then( (response) => {
+    callback(response.data.split(/\r\n|\n|\r/))
+  } ).catch( (error) => {
+    console.error(error)
+    process.exit(1);
+  } )
 
 }
 

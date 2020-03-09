@@ -1,10 +1,10 @@
 {
   "name": "notify-action",
-  "version": "0.0.5",
+  "version": "1.0.0",
   "description": "SendGrid GitHub Notify Action",
   "dependencies": {
     "@sendgrid/mail": "^6.3.1",
-    "request": "^2.88.0",
-    "showdown": "^1.8.6"
+    "showdown": "^1.8.6",
+    "axios": "^0.19"
   }
 }
