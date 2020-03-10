@@ -14,4 +14,4 @@ COPY package.json package-lock.json ./
 COPY src ./src
 RUN npm install --production
 
-ENTRYPOINT ["npm", "start"]
+ENTRYPOINT ["node", "/opt/notify/src/notify.js"]
